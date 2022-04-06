@@ -65,7 +65,7 @@ public class EventControllerTests {
 //				.andExpect(jsonPath("id").value(Matchers.not(10)))
 				.andExpect(jsonPath("free").value(Matchers.not(true)))
 				.andExpect(jsonPath("id").value(Matchers.not(100))
-				.andExpect(jsonPath("free").value(Matchers.not(true))
+//				.andExpect(jsonPath("free").value(Matchers.not(true))
 						)
 				;
 		
