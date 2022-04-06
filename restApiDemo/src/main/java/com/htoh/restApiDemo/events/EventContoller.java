@@ -25,6 +25,7 @@ public class EventContoller {
 		Event event = new ModelMapper().map(eventDto, Event.class);
 		Event newEvent = this.eventRepository.save(event);
 		URI createdUri = linkTo(EventContoller.class).slash(newEvent.getId()).toUri();
+		System.out.println("");
 		return ResponseEntity.created(createdUri).body(event);
 	}
 	
