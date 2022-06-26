@@ -41,6 +41,7 @@ public class EventContoller {
 		}
 		
 		Event event = modelMapper.map(eventDto, Event.class);
+		event.update();
 		System.out.println(event.toString());
 		Event newEvent = this.eventRepository.save(event);
 		URI createUri = linkTo(EventContoller.class).slash(newEvent.getId()).toUri(); // slash에 넣는 값을 상대로 pathVariable 변경
