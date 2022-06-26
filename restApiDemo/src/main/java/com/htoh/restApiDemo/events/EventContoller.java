@@ -4,29 +4,47 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 import java.net.URI;
 
+import javax.validation.Valid;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(value = "/api/events", produces = MediaTypes.HAL_JSON_VALUE+";charset=utf8")
+@RequestMapping(value = "/api/events", produces = MediaTypes.HAL_JSON_VALUE+";charset=utf-8")
 public class EventContoller {
 	
 	@Autowired
-	EventRepository eventRepository;
+	private EventRepository eventRepository;
+	
+	@Autowired
+	private ModelMapper modelMapper;
+	
+	@Autowired
+	private EventValidator eventValidator;
 	
 	@PostMapping
-	public ResponseEntity creatEvent(@RequestBody EventDto eventDto) {
-		Event event = new ModelMapper().map(eventDto, Event.class);
+	public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
+		if (errors.hasErrors()) {
+			return ResponseEntity.badRequest().build();
+		}
+		
+		eventValidator.validate(eventDto, errors);
+		if (errors.hasErrors()) {
+			return ResponseEntity.badRequest().build();
+		}
+		
+		Event event = modelMapper.map(eventDto, Event.class);
+		System.out.println(event.toString());
 		Event newEvent = this.eventRepository.save(event);
-		URI createdUri = linkTo(EventContoller.class).slash(newEvent.getId()).toUri();
-		System.out.println("");
-		return ResponseEntity.created(createdUri).body(event);
+		URI createUri = linkTo(EventContoller.class).slash(newEvent.getId()).toUri(); // slash에 넣는 값을 상대로 pathVariable 변경
+		return ResponseEntity.created(createUri).body(newEvent);
 	}
 	
 }
