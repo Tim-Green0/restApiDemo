@@ -9,6 +9,8 @@ import javax.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.server.mvc.ControllerLinkRelationProvider;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -42,10 +44,16 @@ public class EventContoller {
 		
 		Event event = modelMapper.map(eventDto, Event.class);
 		event.update();
-		System.out.println(event.toString());
 		Event newEvent = this.eventRepository.save(event);
-		URI createUri = linkTo(EventContoller.class).slash(newEvent.getId()).toUri(); // slash에 넣는 값을 상대로 pathVariable 변경
-		return ResponseEntity.created(createUri).body(newEvent);
+		WebMvcLinkBuilder selfLinkBuilder = linkTo(EventContoller.class).slash(newEvent.getId());
+		URI createUri = selfLinkBuilder.toUri(); // slash에 넣는 값을 상대로 pathVariable 변경
+		
+		EventResource eventResource = new EventResource(event);
+		eventResource.add(linkTo(EventContoller.class).withRel("query-events"));
+//		eventResource.add(selfLinkBuilder.withSelfRel());
+		eventResource.add(selfLinkBuilder.withRel("update-events"));
+		
+		return ResponseEntity.created(createUri).body(eventResource);
 	}
 	
 }
